@@ -1,6 +1,9 @@
+.popup__content_content_info {
+  max-width: 430px;
+}
 
 @media screen and (max-width: 568px) {
-    .popup__content_content_info {
-        max-width: calc(100% - 40px);
-    }
+  .popup__content_content_info {
+    max-width: calc(100% - 40px);
+  }
 }
