@@ -1,0 +1,17 @@
+{
+  "name": "mesto-ad-main",
+  "version": "1.0.0",
+  "description": "Mesto — приложение для добавления фотографий",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "deploy": "vite build && gh-pages -d dist"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "gh-pages": "^6.1.1",
+    "vite": "^5.4.21"
+  }
+}
