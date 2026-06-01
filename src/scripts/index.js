@@ -66,7 +66,7 @@ const formatDate = (date) =>
     day: 'numeric',
   });
 
-// ----- Очистка элемента (исправлено: innerHTML)
+// ----- Очистка элемента (исправлено)
 function clearElement(element) {
   element.innerHTML = '';
 }
@@ -100,7 +100,6 @@ function handleInfoClick(cardId) {
       if (!cardData) return;
 
       cardInfoTitle.textContent = 'Информация о карточке';
-      // Исправлено: очистка через innerHTML
       cardInfoList.innerHTML = '';
       cardInfoUserList.innerHTML = '';
 
@@ -185,7 +184,6 @@ function handleAddCardSubmit(evt) {
     .finally(() => renderLoading(submitButton, false, 'Создание...', originalText));
 }
 
-// ----- Обработчики открытия модалок с очисткой ошибок
 document.querySelector('.profile__edit-button').addEventListener('click', () => {
   nameInput.value = profileTitle.textContent;
   jobInput.value = profileDescription.textContent;
@@ -212,7 +210,6 @@ avatarForm.addEventListener('submit', handleAvatarSubmit);
 const allPopups = [editProfileModal, addCardModal, imageModal, avatarModal, cardInfoModal];
 allPopups.forEach((popup) => setCloseModalWindowEventListeners(popup));
 
-// ----- Загрузка данных с сервера
 Promise.all([getUserInfo(), getCardList()])
   .then(([userData, cards]) => {
     currentUserId = userData._id;
