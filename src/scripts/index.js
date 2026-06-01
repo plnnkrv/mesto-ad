@@ -1,6 +1,6 @@
 import '../pages/index.css';
 
-import { createCard, updateLike, removeCard, handleLikeClick } from './components/card.js';
+import { createCard, updateLike, removeCard } from './components/card.js';
 import { openModalWindow, closeModalWindow, setCloseModalWindowEventListeners } from './components/modal.js';
 import { enableValidation, clearValidation } from './components/validation.js';
 import {
@@ -10,6 +10,7 @@ import {
   setUserAvatar,
   addCard,
   deleteCard,
+  changeLikeCardStatus,
 } from './components/api.js';
 
 const placesList = document.querySelector('.places__list');
@@ -66,7 +67,6 @@ const formatDate = (date) =>
     day: 'numeric',
   });
 
-// ----- Очистка элемента (исправлено)
 function clearElement(element) {
   element.innerHTML = '';
 }
@@ -128,11 +128,21 @@ function handleDeleteCard(cardElement, cardId) {
     .catch((err) => console.log(err));
 }
 
+function handleLikeCard(likeButton, likeCount, cardId) {
+  const isLiked = likeButton.classList.contains('card__like-button_is-active');
+  changeLikeCardStatus(cardId, isLiked)
+    .then((updatedCard) => {
+      likeCount.textContent = updatedCard.likes.length;
+      likeButton.classList.toggle('card__like-button_is-active');
+    })
+    .catch((err) => console.log(err));
+}
+
 function renderCard(cardData, userId, method = 'append') {
   const cardElement = createCard(cardData, userId, {
     onPreviewPicture: openImageModal,
     onDeleteCard: handleDeleteCard,
-    onLikeCard: (likeButton, likeCount, cardId) => handleLikeClick(likeButton, likeCount, cardId),
+    onLikeCard: handleLikeCard,
     onInfoClick: handleInfoClick,
   });
   placesList[method](cardElement);
