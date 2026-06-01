@@ -1,6 +1,5 @@
 import { changeLikeCardStatus } from './api.js';
 
-// Получение шаблона карточки
 const getTemplate = () => {
   return document
     .getElementById('card-template')
@@ -8,18 +7,16 @@ const getTemplate = () => {
     .cloneNode(true);
 };
 
-// Обновление счётчика и вида лайка
 export const updateLike = (likeButton, likeCount, likesNumber) => {
   likeButton.classList.toggle('card__like-button_is-active');
   likeCount.textContent = likesNumber;
 };
 
-// Удаление карточки из DOM
 export const removeCard = (cardElement) => {
   cardElement.remove();
 };
 
-// Обработчик клика по лайку 
+// Этот экспорт критически важен!
 export const handleLikeClick = (likeButton, likeCount, cardId) => {
   const isLiked = likeButton.classList.contains('card__like-button_is-active');
   changeLikeCardStatus(cardId, isLiked)
@@ -30,7 +27,6 @@ export const handleLikeClick = (likeButton, likeCount, cardId) => {
     .catch((err) => console.error('Ошибка при лайке:', err));
 };
 
-// Создание карточки 
 export const createCard = (data, userId, { onPreviewPicture, onDeleteCard, onLikeCard, onInfoClick }) => {
   const cardElement = getTemplate();
   const cardImage = cardElement.querySelector('.card__image');
@@ -44,25 +40,19 @@ export const createCard = (data, userId, { onPreviewPicture, onDeleteCard, onLik
   cardElement.querySelector('.card__title').textContent = data.name;
   likeCount.textContent = data.likes.length;
 
-  // Если пользователь уже лайкнул – активируем сердечко
   if (data.likes.some((user) => user._id === userId)) {
     likeButton.classList.add('card__like-button_is-active');
   }
 
-  // Кнопка удаления только для своих карточек
   if (data.owner._id !== userId) {
     deleteButton.remove();
   } else {
     deleteButton.addEventListener('click', () => onDeleteCard(cardElement, data._id));
   }
 
-  // Обработчик лайка 
   likeButton.addEventListener('click', () => onLikeCard(likeButton, likeCount, data._id));
-
-  // Открытие картинки
   cardImage.addEventListener('click', () => onPreviewPicture(data));
 
-  // Информационная кнопка (доп. задание)
   if (infoButton) {
     infoButton.addEventListener('click', () => onInfoClick(data._id));
   }
