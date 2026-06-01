@@ -66,6 +66,7 @@ const formatDate = (date) =>
     day: 'numeric',
   });
 
+// ----- Очистка элемента (исправлено: innerHTML)
 function clearElement(element) {
   element.innerHTML = '';
 }
@@ -99,6 +100,7 @@ function handleInfoClick(cardId) {
       if (!cardData) return;
 
       cardInfoTitle.textContent = 'Информация о карточке';
+      // Исправлено: очистка через innerHTML
       cardInfoList.innerHTML = '';
       cardInfoUserList.innerHTML = '';
 
@@ -137,7 +139,6 @@ function renderCard(cardData, userId, method = 'append') {
   placesList[method](cardElement);
 }
 
-
 function handleEditProfileSubmit(evt) {
   evt.preventDefault();
   const submitButton = editForm.querySelector('.popup__button');
@@ -163,7 +164,6 @@ function handleAvatarSubmit(evt) {
   setUserAvatar({ avatar: avatarInput.value })
     .then((userData) => {
       profileImage.style.backgroundImage = `url('${userData.avatar}')`;
-      // avatarForm.reset(); // УДАЛЕНО – очистка выполняется при открытии
       closeModalWindow(avatarModal);
     })
     .catch((err) => console.log(err))
@@ -179,15 +179,13 @@ function handleAddCardSubmit(evt) {
   addCard({ name: placeNameInput.value, link: placeLinkInput.value })
     .then((newCard) => {
       renderCard(newCard, currentUserId, 'prepend');
-      // addForm.reset(); // УДАЛЕНО
-      // clearValidation(addForm, validationConfig); // УДАЛЕНО
       closeModalWindow(addCardModal);
     })
     .catch((err) => console.log(err))
     .finally(() => renderLoading(submitButton, false, 'Создание...', originalText));
 }
 
-
+// ----- Обработчики открытия модалок с очисткой ошибок
 document.querySelector('.profile__edit-button').addEventListener('click', () => {
   nameInput.value = profileTitle.textContent;
   jobInput.value = profileDescription.textContent;
@@ -214,6 +212,7 @@ avatarForm.addEventListener('submit', handleAvatarSubmit);
 const allPopups = [editProfileModal, addCardModal, imageModal, avatarModal, cardInfoModal];
 allPopups.forEach((popup) => setCloseModalWindowEventListeners(popup));
 
+// ----- Загрузка данных с сервера
 Promise.all([getUserInfo(), getCardList()])
   .then(([userData, cards]) => {
     currentUserId = userData._id;
