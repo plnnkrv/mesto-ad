@@ -1,26 +1,73 @@
-export const initialCards = [
-    {
-      name: "Архыз",
-      link: "https://pictures.s3.yandex.net/frontend-developer/cards-compressed/arkhyz.jpg",
-    },
-    {
-      name: "Челябинская область",
-      link: "https://pictures.s3.yandex.net/frontend-developer/cards-compressed/chelyabinsk-oblast.jpg",
-    },
-    {
-      name: "Иваново",
-      link: "https://pictures.s3.yandex.net/frontend-developer/cards-compressed/ivanovo.jpg",
-    },
-    {
-      name: "Камчатка",
-      link: "https://pictures.s3.yandex.net/frontend-developer/cards-compressed/kamchatka.jpg",
-    },
-    {
-      name: "Холмогорский район",
-      link: "https://pictures.s3.yandex.net/frontend-developer/cards-compressed/kholmogorsky-rayon.jpg",
-    },
-    {
-      name: "Байкал",
-      link: "https://pictures.s3.yandex.net/frontend-developer/cards-compressed/baikal.jpg",
-    },
-];
+
+import { changeLikeCardStatus } from './api.js';
+
+// Получение шаблона карточки
+const getTemplate = () => {
+  return document
+    .getElementById('card-template')
+    .content.querySelector('.card')
+    .cloneNode(true);
+};
+
+// Обновление счётчика и класса лайка 
+export const updateLike = (likeButton, likeCount, likesNumber) => {
+  likeButton.classList.toggle('card__like-button_is-active');
+  likeCount.textContent = likesNumber;
+};
+
+// Удаление карточки из DOM
+export const removeCard = (cardElement) => {
+  cardElement.remove();
+};
+
+// Новая функция: обработка клика по лайку 
+export const handleLikeClick = (likeButton, likeCount, cardId) => {
+  const isLiked = likeButton.classList.contains('card__like-button_is-active');
+  changeLikeCardStatus(cardId, isLiked)
+    .then((updatedCard) => {
+      // Обновляем счётчик и класс кнопки
+      likeCount.textContent = updatedCard.likes.length;
+      likeButton.classList.toggle('card__like-button_is-active');
+    })
+    .catch((err) => console.error('Ошибка при постановке/снятии лайка:', err));
+};
+
+// Создание карточки 
+export const createCard = (data, userId, { onPreviewPicture, onDeleteCard, onLikeCard, onInfoClick }) => {
+  const cardElement = getTemplate();
+  const cardImage = cardElement.querySelector('.card__image');
+  const likeButton = cardElement.querySelector('.card__like-button');
+  const likeCount = cardElement.querySelector('.card__like-count');
+  const deleteButton = cardElement.querySelector('.card__delete-button');
+  const infoButton = cardElement.querySelector('.card__control-button_type_info');
+
+  cardImage.src = data.link;
+  cardImage.alt = data.name;
+  cardElement.querySelector('.card__title').textContent = data.name;
+  likeCount.textContent = data.likes.length;
+
+  // Если пользователь уже лайкнул – активируем сердечко
+  if (data.likes.some((user) => user._id === userId)) {
+    likeButton.classList.add('card__like-button_is-active');
+  }
+
+  // Кнопка удаления только для своих карточек
+  if (data.owner._id !== userId) {
+    deleteButton.remove();
+  } else {
+    deleteButton.addEventListener('click', () => onDeleteCard(cardElement, data._id));
+  }
+
+  // Обработчик лайка использует переданный колбэк 
+  likeButton.addEventListener('click', () => onLikeCard(likeButton, likeCount, data._id));
+
+  // Открытие картинки
+  cardImage.addEventListener('click', () => onPreviewPicture(data));
+
+  // Инфо
+  if (infoButton) {
+    infoButton.addEventListener('click', () => onInfoClick(data._id));
+  }
+
+  return cardElement;
+};
