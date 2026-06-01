@@ -16,7 +16,6 @@ export const removeCard = (cardElement) => {
   cardElement.remove();
 };
 
-// Этот экспорт критически важен!
 export const handleLikeClick = (likeButton, likeCount, cardId) => {
   const isLiked = likeButton.classList.contains('card__like-button_is-active');
   changeLikeCardStatus(cardId, isLiked)
