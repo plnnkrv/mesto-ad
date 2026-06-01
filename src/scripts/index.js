@@ -1,5 +1,6 @@
 import '../pages/index.css';
-import { createCard, updateLike, removeCard } from './components/card.js';
+
+import { createCard, updateLike, removeCard, handleLikeClick } from './components/card.js';
 import { openModalWindow, closeModalWindow, setCloseModalWindowEventListeners } from './components/modal.js';
 import { enableValidation, clearValidation } from './components/validation.js';
 import {
@@ -9,7 +10,6 @@ import {
   setUserAvatar,
   addCard,
   deleteCard,
-  changeLikeCardStatus,
 } from './components/api.js';
 
 const placesList = document.querySelector('.places__list');
@@ -66,6 +66,10 @@ const formatDate = (date) =>
     day: 'numeric',
   });
 
+function clearElement(element) {
+  element.innerHTML = '';
+}
+
 function openImageModal(data) {
   modalImage.src = data.link;
   modalImage.alt = data.name;
@@ -88,12 +92,6 @@ function createUserBadge(user) {
   return item;
 }
 
-function clearElement(element) {
-  while (element.firstChild) {
-    element.removeChild(element.firstChild);
-  }
-}
-
 function handleInfoClick(cardId) {
   getCardList()
     .then((cards) => {
@@ -101,8 +99,8 @@ function handleInfoClick(cardId) {
       if (!cardData) return;
 
       cardInfoTitle.textContent = 'Информация о карточке';
-      clearElement(cardInfoList);
-      clearElement(cardInfoUserList);
+      cardInfoList.innerHTML = '';
+      cardInfoUserList.innerHTML = '';
 
       cardInfoList.append(
         createInfoItem('Описание:', cardData.name),
@@ -121,15 +119,6 @@ function handleInfoClick(cardId) {
     .catch((err) => console.log(err));
 }
 
-function handleLikeCard(likeButton, likeCount, cardId) {
-  const isLiked = likeButton.classList.contains('card__like-button_is-active');
-  changeLikeCardStatus(cardId, isLiked)
-    .then((updatedCard) => {
-      updateLike(likeButton, likeCount, updatedCard.likes.length);
-    })
-    .catch((err) => console.log(err));
-}
-
 function handleDeleteCard(cardElement, cardId) {
   deleteCard(cardId)
     .then(() => {
@@ -142,11 +131,12 @@ function renderCard(cardData, userId, method = 'append') {
   const cardElement = createCard(cardData, userId, {
     onPreviewPicture: openImageModal,
     onDeleteCard: handleDeleteCard,
-    onLikeCard: handleLikeCard,
+    onLikeCard: (likeButton, likeCount, cardId) => handleLikeClick(likeButton, likeCount, cardId),
     onInfoClick: handleInfoClick,
   });
   placesList[method](cardElement);
 }
+
 
 function handleEditProfileSubmit(evt) {
   evt.preventDefault();
@@ -173,7 +163,7 @@ function handleAvatarSubmit(evt) {
   setUserAvatar({ avatar: avatarInput.value })
     .then((userData) => {
       profileImage.style.backgroundImage = `url('${userData.avatar}')`;
-      avatarForm.reset();
+      // avatarForm.reset(); // УДАЛЕНО – очистка выполняется при открытии
       closeModalWindow(avatarModal);
     })
     .catch((err) => console.log(err))
@@ -189,13 +179,14 @@ function handleAddCardSubmit(evt) {
   addCard({ name: placeNameInput.value, link: placeLinkInput.value })
     .then((newCard) => {
       renderCard(newCard, currentUserId, 'prepend');
-      addForm.reset();
-      clearValidation(addForm, validationConfig);
+      // addForm.reset(); // УДАЛЕНО
+      // clearValidation(addForm, validationConfig); // УДАЛЕНО
       closeModalWindow(addCardModal);
     })
     .catch((err) => console.log(err))
     .finally(() => renderLoading(submitButton, false, 'Создание...', originalText));
 }
+
 
 document.querySelector('.profile__edit-button').addEventListener('click', () => {
   nameInput.value = profileTitle.textContent;
