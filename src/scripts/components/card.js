@@ -1,3 +1,5 @@
+import { changeLikeCardStatus } from './api.js';
+
 const getTemplate = () => {
   return document
     .getElementById('card-template')
@@ -14,12 +16,23 @@ export const removeCard = (cardElement) => {
   cardElement.remove();
 };
 
+// Этот экспорт критически важен!
+export const handleLikeClick = (likeButton, likeCount, cardId) => {
+  const isLiked = likeButton.classList.contains('card__like-button_is-active');
+  changeLikeCardStatus(cardId, isLiked)
+    .then((updatedCard) => {
+      likeCount.textContent = updatedCard.likes.length;
+      likeButton.classList.toggle('card__like-button_is-active');
+    })
+    .catch((err) => console.error('Ошибка при лайке:', err));
+};
+
 export const createCard = (data, userId, { onPreviewPicture, onDeleteCard, onLikeCard, onInfoClick }) => {
   const cardElement = getTemplate();
   const cardImage = cardElement.querySelector('.card__image');
   const likeButton = cardElement.querySelector('.card__like-button');
   const likeCount = cardElement.querySelector('.card__like-count');
-  const deleteButton = cardElement.querySelector('.card__control-button_type_delete');
+  const deleteButton = cardElement.querySelector('.card__delete-button');
   const infoButton = cardElement.querySelector('.card__control-button_type_info');
 
   cardImage.src = data.link;
@@ -39,7 +52,10 @@ export const createCard = (data, userId, { onPreviewPicture, onDeleteCard, onLik
 
   likeButton.addEventListener('click', () => onLikeCard(likeButton, likeCount, data._id));
   cardImage.addEventListener('click', () => onPreviewPicture(data));
-  infoButton.addEventListener('click', () => onInfoClick(data._id));
+
+  if (infoButton) {
+    infoButton.addEventListener('click', () => onInfoClick(data._id));
+  }
 
   return cardElement;
 };

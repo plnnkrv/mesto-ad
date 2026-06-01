@@ -4,9 +4,5 @@
   line-height: 15px;
   font-weight: 400;
   color: #FF0000;
-  margin-top: 5px;
-}
-
-.popup__error_visible {
-  display: block;
+  margin-top: 5px;   
 }
